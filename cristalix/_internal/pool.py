@@ -22,30 +22,42 @@ class AccountPool:
         params=None,
         json=None,
     ):
-        acc = await self.acquire()
+        tried_accounts = set()
 
-        params = params or {}
-        params["project_key"] = acc.project_key
+        while True:
+            acc = await self.acquire()
+            if acc in tried_accounts and len(tried_accounts) >= len(self._accounts):
+                raise ApiError("Все аккаунты исчерпали лимиты (429)")
 
-        r = await self.http.request(
-            method,
-            self.BASE_URL + path,
-            params=params,
-            json=json,
-            headers=acc.auth_headers,
-        )
+            tried_accounts.add(acc)
 
-        if r.status_code == 401:
-            raise Unauthorized()
-        if r.status_code == 404:
-            raise NotFound()
-        if r.status_code >= 400:
-            raise ApiError(r.text)
+            params = params or {}
+            params["project_key"] = acc.project_key
 
-        try:
-            return r.json()
-        except Exception as e:
-            raise ApiError("Invalid JSON response") from e
+            r = await self.http.request(
+                method,
+                self.BASE_URL + path,
+                params=params,
+                json=json,
+                headers=acc.auth_headers,
+            )
+
+            if r.status_code == 401:
+                raise Unauthorized()
+            if r.status_code == 404:
+                raise NotFound()
+
+            if r.status_code == 429:
+                acc.limiter.tokens = min(acc.limiter.capacity, acc.limiter.tokens + 75)
+                continue
+
+            if r.status_code >= 400:
+                raise ApiError(r.text)
+
+            try:
+                return r.json()
+            except Exception as e:
+                raise ApiError("Invalid JSON response") from e
 
     async def acquire(self) -> Account:
         while True:
