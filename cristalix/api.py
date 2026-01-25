@@ -14,6 +14,9 @@ DEFAULT_HEADERS = {
 
 
 class CristalixAPI:
+    players: PlayersAPI
+    statistics: StatisticsAPI
+
     def __init__(
         self,
         *,
@@ -45,8 +48,8 @@ class CristalixAPI:
 
         pool = AccountPool(acc_objects, http, BASE_URL)
 
-        self.players = PlayersAPI(pool)
-        self.statistics = StatisticsAPI(pool)
+        self.players: PlayersAPI = PlayersAPI(pool)
+        self.statistics: StatisticsAPI = StatisticsAPI(pool)
 
         self._pool = pool
 

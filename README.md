@@ -7,7 +7,7 @@ Python SDK для работы с официальным API Cristalix (Players 
 ```bash
 pip install cristalix
 ```
-Пример использования
+## Пример использования
 ```python
 import asyncio
 from cristalix.api import CristalixAPI

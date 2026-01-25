@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 from re import compile
@@ -38,8 +38,6 @@ class Player:
     last_join_time: str | None = None
     last_quit_time: str | None = None
     online_time: float = 0.0
-    friends: list['FriendPlayer'] = field(default_factory=list)
-    subscriptions: list['FriendPlayer'] = field(default_factory=list)
     first_group: Optional['DonateGroup'] = None
     second_group: Optional['DonateGroup'] = None
     realm: str | None = None
@@ -78,14 +76,6 @@ class Player:
             return '🟢'
         elif not self.is_online:
             return '🔴'
-
-    @property
-    def friend_count(self) -> int:
-        return len(self.friends)
-
-    @property
-    def sub_count(self) -> int:
-        return len(self.subscriptions)
 
     @staticmethod
     def convert_seconds_to_rounded(seconds: int) -> str:
