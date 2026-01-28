@@ -12,8 +12,10 @@ class PublicPlayerService:
         self.http = HttpClient(headers={}, timeout=timeout)
 
     async def list_roles(self):
-        url = BASE_URL + "/players/v1/getAllRoles"
-        r = await self.http.request("GET", url)
+        r = await self.http.request(
+            "GET",
+            BASE_URL + "/players/v1/getAllRoles"
+        )
         if not r or r.status_code != 200:
             return None
 
@@ -24,8 +26,11 @@ class PublicPlayerService:
         return raw
 
     async def get_player_public(self, nickname: str) -> Player | None:
-        url = BASE_URL + "/players/v1/getProfileByName"
-        r = await self.http.request("GET", url, params={"playerName": nickname})
+        r = await self.http.request(
+            "GET",
+            BASE_URL + "/players/v1/getProfileByName",
+            params={"playerName": nickname}
+        )
         if not r or r.status_code != 200:
             return None
 

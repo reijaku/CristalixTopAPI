@@ -12,41 +12,41 @@ class PlayersAPI:
         for i in range(0, len(items), size):
             yield items[i:i + size]
 
-    async def get_player(self, nickname: str) -> Player | None:
+    async def get_player(self, nickname: str) -> dict | None:
         """Возвращает основную информацию о профиле игрока: никнейм, группу, ссылки на скины и время в игре."""
         data = await self.pool.request(
             "GET",
             self.BASE + "getProfileByName",
             params={"playerName": nickname},
         )
-        return Player.from_dict(data) if data else None
+        return data
 
-    async def get_player_by_uuid(self, uuid: str) -> Player | None:
+    async def get_player_by_uuid(self, uuid: str) -> dict | None:
         """Возвращает основную информацию о профиле игрока: никнейм, группу, ссылки на скины и время в игре."""
         data = await self.pool.request(
             "GET",
             self.BASE + "getProfileById",
             params={"playerId": uuid},
         )
-        return Player.from_dict(data) if data else None
+        return data
 
-    async def get_players(self, nicknames: list[str]) -> list[Player] | None:
+    async def get_players(self, nicknames: list[str]) -> list[dict] | None:
         """Возвращает основную информацию о профилях игроков: никнейм, группу, ссылки на скины и время в игре."""
         data = await self.pool.request(
             "GET",
             self.BASE + "getProfilesByNames",
             json={"array": nicknames},
         )
-        return [Player.from_dict(p) for p in data] if data else None
+        return data
 
-    async def get_players_by_uuid(self, uuids: list[str]) -> list[Player] | None:
+    async def get_players_by_uuid(self, uuids: list[str]) -> list[dict] | None:
         """Возвращает основную информацию о профилях игроков: никнейм, группу, ссылки на скины и время в игре."""
         data = await self.pool.request(
             "GET",
             self.BASE + "getProfilesByIds",
             json={"array": uuids},
         )
-        return [Player.from_dict(p) for p in data] if data else None
+        return data
 
     async def get_player_reactions(self, uuid: str) -> dict | None:
         """Получить количество лайков и дизлайков в профиле игрока."""
@@ -57,21 +57,25 @@ class PlayersAPI:
         )
         return data
 
-    async def get_friends(self, uuid: str,
+    async def get_friends(self,
+                          uuid: str,
                           max_count: int | None = None,
-                          extended: bool = False) -> list[FriendPlayer] | None:
-        friends = await self._get_relations(uuid, "getFriends", max_count=max_count)
-        if extended and friends:
-            await self._populate_profiles(friends)
-        return friends
+                          extended: bool = False) -> tuple[list[dict], int]:
+        friends, total = await self._get_relations(uuid, "getFriends", max_count=max_count)
 
-    async def get_subscriptions(self, uuid: str,
+        if extended and friends:
+            friends = await self._populate_profiles(friends)
+        return friends, total
+
+    async def get_subscriptions(self,
+                                uuid: str,
                                 max_count: int | None = None,
-                                extended: bool = False) -> list[FriendPlayer] | None:
-        subs = await self._get_relations(uuid, "getSubscriptions", max_count=max_count)
+                                extended: bool = False) -> tuple[list[dict], int]:
+        subs, total = await self._get_relations(uuid, "getSubscriptions", max_count=max_count)
+
         if extended and subs:
-            await self._populate_profiles(subs)
-        return subs
+            subs = await self._populate_profiles(subs)
+        return subs, total
 
     async def _get_relations(
         self,
@@ -79,10 +83,12 @@ class PlayersAPI:
         endpoint: str,
         *,
         max_count: int | None = None
-    ) -> list[FriendPlayer] | None:
-        relations: list[FriendPlayer] = []
+    ) -> tuple[list[dict], int]:
+        relations: list[dict] = []
         current_skip = 0
         batch_size = 100
+
+        total_count = 0
 
         while True:
             if max_count is not None:
@@ -97,57 +103,46 @@ class PlayersAPI:
                 "skip": current_skip,
                 "limit": to_fetch,
             }
+
             r = await self.pool.request(
                 "GET",
                 self.BASE + endpoint,
                 params=params,
             )
 
-            if not r:
-                return None
-
             batch = r.get("list", [])
-            total = r.get("totalCount", 0)
+
+            if not total_count:
+                total_count = r.get("totalCount", 0)
 
             if not batch:
                 break
 
-            relations.extend(
-                FriendPlayer(
-                    uuid=f.get("playerId"),
-                    username=f.get("username"),
-                    groupName=f.get("groupName"),
-                    relationType=f.get("relationType"),
-                )
-                for f in batch
-            )
+            relations.extend(batch)
 
             if max_count is not None and len(relations) >= max_count:
                 break
-            if len(relations) >= total:
+            if len(relations) >= total_count:
                 break
 
             current_skip += to_fetch
 
-        return relations or None
+        return relations, total_count
 
-    async def _populate_profiles(self, relations: list[FriendPlayer], batch_size: int = 50) -> None:
-        """
-        Обогащает FriendPlayer.profile объектами Player (батчами по batch_size).
-        """
+    async def _populate_profiles(self, relations: list[dict], batch_size: int = 50) -> list[dict]:
         if not relations:
-            return
+            return []
+
+        new_relations = []
 
         for chunk in self._chunked(relations, batch_size):
-            names = [r.username for r in chunk if r.username]
+            names = [r.get("username") for r in chunk if r.get("username")]
             if not names:
                 continue
 
             players = await self.get_players(names)
             if not players:
                 continue
+            new_relations.extend(players)
 
-            players_map = {p.username.lower(): p for p in players if p.username}
-
-            for relation in chunk:
-                relation.profile = players_map.get(relation.username.lower())
+        return new_relations
