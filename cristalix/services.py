@@ -1,5 +1,4 @@
 from ._internal.http import HttpClient
-from cristalix.models import Player, DonateGroup
 
 BASE_URL = "https://api.cristalix.gg"
 BASE_TEXTURE_URL = "https://webdata.c7x.dev/textures"
@@ -10,6 +9,32 @@ class PublicPlayerService:
     """
     def __init__(self, *, timeout: int = 10):
         self.http = HttpClient(headers={}, timeout=timeout)
+
+    async def get_web_profiles_by_ids(self, uuids: list[str]) -> list[dict]:
+        r = await self.http.request(
+            "POST",
+            BASE_URL + "/players/v1/getWebProfilesByIds",
+            json={"array": uuids}
+        )
+        if not r or r.status_code != 200:
+            return []
+
+        raw = r.json()
+
+        return raw
+
+    async def search(self, pattern: str) -> list[dict]:
+        r = await self.http.request(
+            "GET",
+            BASE_URL + "/players/v1/search",
+            params={"pattern": pattern}
+        )
+        if not r or r.status_code != 200:
+            return []
+
+        raw = r.json()
+
+        return raw
 
     async def list_roles(self):
         r = await self.http.request(
@@ -23,9 +48,10 @@ class PublicPlayerService:
 
         if not raw:
             return None
+
         return raw
 
-    async def get_player_public(self, nickname: str) -> Player | None:
+    async def get_player_public(self, nickname: str) -> dict | None:
         r = await self.http.request(
             "GET",
             BASE_URL + "/players/v1/getProfileByName",
@@ -34,39 +60,9 @@ class PublicPlayerService:
         if not r or r.status_code != 200:
             return None
 
-        raw = r.json()
+        data = r.json()
 
-        if not raw:
-            return None
-
-        player = Player(
-            id=raw.get("playerId"),
-            username=raw.get("name"),
-            realm=raw.get("realm"),
-            last_join_time=raw.get("lastJoinTime"),
-            last_quit_time=raw.get("lastQuitTime"),
-        )
-
-        first_group = second_group = None
-        roles = raw.get("permissionContext", {}).get("roles", [])
-
-        for role in roles:
-            name = role.get("name")
-            if not name or name == "PLAYER":
-                continue
-            if role.get("staffGroup") and not first_group:
-                first_group = name
-            elif not first_group:
-                first_group = name
-            elif not second_group:
-                second_group = name
-
-        if first_group:
-            player.firstGroup = DonateGroup(key=first_group)
-        if second_group:
-            player.secondGroup = DonateGroup(key=second_group)
-
-        return player
+        return data
 
     async def get_skin(self, uuid: str) -> bytes | None:
         url = f"{BASE_TEXTURE_URL}/skin/{uuid}"

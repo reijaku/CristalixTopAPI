@@ -86,7 +86,6 @@ class Player:
         donate = self._data.get("donate")
         return DonateGroup(donate) if donate else None
 
-
     @property
     def last_join_ts(self) -> int:
         return iso_to_ts(self.last_join_time)
@@ -94,6 +93,10 @@ class Player:
     @property
     def last_quit_ts(self) -> int:
         return iso_to_ts(self.last_quit_time)
+
+    @property
+    def is_personal(self) -> bool:
+        return self.first_group.staff_group if self.first_group else False
 
     @property
     def is_online(self) -> bool | None:
@@ -113,7 +116,6 @@ class Player:
     def clean_realm(self) -> str:
         """Realm без цветовых кодов."""
         return COLOR_CODE_RE.sub("", self.realm)
-
 
     @property
     def registration_ts(self) -> int | None:

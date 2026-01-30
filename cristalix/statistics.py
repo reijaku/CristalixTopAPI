@@ -15,6 +15,15 @@ class StatisticsAPI:
         )
         return data
 
+    async def get_player_lifetime_statistics(self, uuid: str) -> list[dict]:
+        """Полная статистика игрока по всем играм, в которые он когда-либо играл за все периоды которые доступны."""
+        data = await self.pool.request(
+            "GET",
+            self.BASE + "getAllProfileStatistics",
+            params={"playerId": uuid},
+        )
+        return data
+
     async def get_player_statistics(self, uuid: str) -> dict | None:
         """Полная статистика игрока по всем играм, в которые он когда-либо играл."""
         data = await self.pool.request(
