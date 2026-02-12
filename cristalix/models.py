@@ -1,4 +1,3 @@
-from datetime import datetime
 from re import compile
 
 COLOR_CODE_RE = compile(r'§.')
