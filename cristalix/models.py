@@ -7,12 +7,6 @@ def now_ts() -> int:
     from time import time
     return int(time())
 
-def iso_to_ts(iso: str | None = None) -> int:
-    if not iso:
-        return 0
-    iso = iso.replace("Z", "+00:00")
-    return int(datetime.fromisoformat(iso).timestamp())
-
 class DonateGroup:
     def __init__(self, data: dict):
         self._data = data
@@ -61,12 +55,14 @@ class Player:
         return self._data.get("username")
 
     @property
-    def last_join_time(self) -> str | None:
-        return self._data.get("lastJoinTime")
+    def last_join_ts(self) -> int:
+        ts = self._data.get("lastJoinTime", "0")
+        return int(ts)
 
     @property
-    def last_quit_time(self) -> str | None:
-        return self._data.get("lastQuitTime")
+    def last_quit_ts(self) -> int:
+        ts = self._data.get("lastQuitTime", "0")
+        return int(ts)
 
     @property
     def online_time(self) -> float:
@@ -85,14 +81,6 @@ class Player:
     def second_group(self) -> DonateGroup | None:
         donate = self._data.get("donate")
         return DonateGroup(donate) if donate else None
-
-    @property
-    def last_join_ts(self) -> int:
-        return iso_to_ts(self.last_join_time)
-
-    @property
-    def last_quit_ts(self) -> int:
-        return iso_to_ts(self.last_quit_time)
 
     @property
     def is_personal(self) -> bool:
