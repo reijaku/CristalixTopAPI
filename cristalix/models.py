@@ -56,12 +56,12 @@ class Player:
     @property
     def last_join_ts(self) -> int:
         ts = self._data.get("lastJoinTime", "0")
-        return int(ts)
+        return int(int(ts) / 1000)
 
     @property
     def last_quit_ts(self) -> int:
         ts = self._data.get("lastQuitTime", "0")
-        return int(ts)
+        return int(int(ts) / 1000)
 
     @property
     def online_time(self) -> float:
