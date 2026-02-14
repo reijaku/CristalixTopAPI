@@ -95,8 +95,6 @@ class Player:
             return None
         if self.last_join_ts > self.last_quit_ts:
             return True
-        if self.last_quit_ts - self.last_join_ts <= 3:
-            return True
         return False
 
     @property
