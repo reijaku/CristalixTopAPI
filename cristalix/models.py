@@ -41,6 +41,9 @@ class Player:
     def __init__(self, data: dict):
         self._data = data if data is not None else {}
 
+    def __bool__(self) -> bool:
+        return bool(self._data)
+
     @property
     def id(self) -> str:
         return self._data.get("id")
