@@ -39,7 +39,7 @@ class DonateGroup:
 
 class Player:
     def __init__(self, data: dict):
-        self._data = data
+        self._data = data if data is not None else {}
 
     @property
     def id(self) -> str:

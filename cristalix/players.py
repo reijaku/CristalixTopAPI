@@ -1,6 +1,3 @@
-from cristalix.models import Player, FriendPlayer
-
-
 class PlayersAPI:
     BASE = "/players/v1/"
 
