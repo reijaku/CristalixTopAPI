@@ -1,8 +1,12 @@
+from typing import Literal
 import asyncio
 from .account import Account
 from .http import HttpClient
 from cristalix.errors import Unauthorized, NotFound, ApiError
 
+HttpMethod = Literal[
+    "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "PATCH", "QUERY"
+]
 
 class AccountPool:
     BASE_URL = 'https://api.cristalix.gg'
@@ -16,7 +20,7 @@ class AccountPool:
 
     async def request(
         self,
-        method: str,
+        method: HttpMethod,
         path: str,
         *,
         params=None,

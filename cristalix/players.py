@@ -1,3 +1,5 @@
+from typing import Generator
+
 class PlayersAPI:
     BASE = "/players/v1/"
 
@@ -5,7 +7,7 @@ class PlayersAPI:
         self.pool = pool
 
     @staticmethod
-    def _chunked(items: list, size: int) -> list[list]:
+    def _chunked(items: list, size: int) -> Generator[list, None, None]:
         for i in range(0, len(items), size):
             yield items[i:i + size]
 
@@ -27,23 +29,23 @@ class PlayersAPI:
         )
         return data
 
-    async def get_players(self, nicknames: list[str]) -> list[dict] | None:
+    async def get_players(self, nicknames: list[str]) -> list[dict]:
         """Возвращает основную информацию о профилях игроков: никнейм, группу, ссылки на скины и время в игре."""
         data = await self.pool.request(
             "GET",
             self.BASE + "getProfilesByNames",
             json={"array": nicknames},
         )
-        return data
+        return data or []
 
-    async def get_players_by_uuid(self, uuids: list[str]) -> list[dict] | None:
+    async def get_players_by_uuid(self, uuids: list[str]) -> list[dict]:
         """Возвращает основную информацию о профилях игроков: никнейм, группу, ссылки на скины и время в игре."""
         data = await self.pool.request(
             "GET",
             self.BASE + "getProfilesByIds",
             json={"array": uuids},
         )
-        return data
+        return data or []
 
     async def get_player_reactions(self, uuid: str) -> dict | None:
         """Получить количество лайков и дизлайков в профиле игрока."""

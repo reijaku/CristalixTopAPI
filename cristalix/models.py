@@ -1,6 +1,6 @@
 from re import compile
 
-COLOR_CODE_RE = compile(r'§.')
+COLOR_CODE_RE = compile(r"§.")
 
 def now_ts() -> int:
     from time import time
@@ -16,7 +16,7 @@ class DonateGroup:
 
     @property
     def name(self) -> str:
-        return self._data.get("name")
+        return self._data.get("name", "")
 
     @property
     def prefix_color(self) -> str | None:
@@ -38,7 +38,7 @@ class DonateGroup:
         return self._data.copy()
 
 class Player:
-    def __init__(self, data: dict):
+    def __init__(self, data: dict | None):
         self._data = data if data is not None else {}
 
     def __bool__(self) -> bool:
@@ -46,7 +46,7 @@ class Player:
 
     @property
     def id(self) -> str:
-        return self._data.get("id")
+        return self._data.get("id", "")
 
     @property
     def uuid(self) -> str:
@@ -54,7 +54,7 @@ class Player:
 
     @property
     def username(self) -> str:
-        return self._data.get("username")
+        return self._data.get("username", "")
 
     @property
     def last_join_ts(self) -> int:
@@ -108,7 +108,7 @@ class Player:
     @property
     def registration_ts(self) -> int | None:
         try:
-            parts = self.id.split('-')
+            parts = self.id.split("-")
             if len(parts) != 5:
                 return None
 

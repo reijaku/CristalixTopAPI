@@ -1,5 +1,7 @@
 from typing import Literal
 
+TIME_LITERAL = Literal['HOUR', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'ALL']
+
 class StatisticsAPI:
     BASE = "/statistics/v1/"
 
@@ -42,15 +44,15 @@ class StatisticsAPI:
         return data
 
     async def get_leaderboard(self,
-                              time: Literal['HOUR', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'ALL'],
+                              time: TIME_LITERAL,
                               game_id: str,
                               mode_key: str,
                               sub_mode_key: str,
                               sort_field: str,
                               season_key: str):
-        """НЕ РАБОТАЕТ Получить топ игроков по определенному параметру, режиму и временному промежутку."""
-        # data = await self.pool.request(
-        #     "GET",
-        #     self.BASE + "readByTimeRating"
-        # )
-        return None
+        """Получить топ игроков по определенному параметру, режиму и временному промежутку."""
+        data = await self.pool.request(
+            "GET",
+            self.BASE + "readByTimeRating"
+        )
+        return data
