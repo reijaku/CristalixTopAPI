@@ -5,6 +5,11 @@ from ._internal.limiter import RateLimiter
 
 from .players import PlayersAPI
 from .statistics import StatisticsAPI
+from .games import GamesAPI
+from .player_stats import PlayerStatsAPI
+from .social import SocialAPI
+from .ratings import RatingsAPI
+from .roles import RolesAPI
 
 BASE_URL = "https://api.cristalix.gg"
 DEFAULT_HEADERS = {
@@ -16,6 +21,11 @@ DEFAULT_HEADERS = {
 class CristalixAPI:
     players: PlayersAPI
     statistics: StatisticsAPI
+    games: GamesAPI
+    player_stats: PlayerStatsAPI
+    social: SocialAPI
+    ratings: RatingsAPI
+    roles: RolesAPI
 
     def __init__(
         self,
@@ -50,6 +60,11 @@ class CristalixAPI:
 
         self.players: PlayersAPI = PlayersAPI(pool)
         self.statistics: StatisticsAPI = StatisticsAPI(pool)
+        self.games: GamesAPI = GamesAPI(pool)
+        self.player_stats: PlayerStatsAPI = PlayerStatsAPI(pool)
+        self.social: SocialAPI = SocialAPI(pool)
+        self.ratings: RatingsAPI = RatingsAPI(pool)
+        self.roles: RolesAPI = RolesAPI(pool)
 
         self._pool = pool
 

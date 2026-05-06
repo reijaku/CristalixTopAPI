@@ -35,15 +35,15 @@ class AccountPool:
 
             tried_accounts.add(acc)
 
-            params = params or {}
-            params["project_key"] = acc.project_key
+            headers = acc.auth_headers.copy()
+            headers["X-Project-Key"] = acc.project_key
 
             r = await self.http.request(
                 method,
-                self.BASE_URL + path,
+                self.base_url + path,
                 params=params,
                 json=json,
-                headers=acc.auth_headers,
+                headers=headers,
             )
 
             if r.status_code == 401:
