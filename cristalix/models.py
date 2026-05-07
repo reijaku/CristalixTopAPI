@@ -90,7 +90,9 @@ class Player:
     @property
     def last_seen_online(self) -> str:
         """ISO timestamp последнего онлайна"""
-        social = self._data.get("social", {})
+        social = self._data.get("social")
+        if not social or not isinstance(social, dict):
+            return ""
         return social.get("lastSeenOnline", "")
 
     @property
@@ -109,13 +111,17 @@ class Player:
     @property
     def realm(self) -> str:
         """Текущий реалм (может быть пустым если privacyHidden)"""
-        status = self._data.get("status", {})
+        status = self._data.get("status")
+        if not status or not isinstance(status, dict):
+            return ""
         return status.get("realm", "")
 
     @property
     def realm_type(self) -> str:
         """Тип реалма (LW, SW и т.д.)"""
-        status = self._data.get("status", {})
+        status = self._data.get("status")
+        if not status or not isinstance(status, dict):
+            return ""
         return status.get("realmType", "")
 
     @property
@@ -126,19 +132,25 @@ class Player:
     @property
     def staff_group(self) -> str:
         """Staff группа (HELPER, MODERATOR, ADMIN и т.д.)"""
-        groups = self._data.get("groups", {})
+        groups = self._data.get("groups")
+        if not groups or not isinstance(groups, dict):
+            return "PLAYER"
         return groups.get("staff", "PLAYER")
 
     @property
     def donate_group(self) -> str:
         """Донат группа (MVP, PREMIUM_PLUS, GOD и т.д.)"""
-        groups = self._data.get("groups", {})
+        groups = self._data.get("groups")
+        if not groups or not isinstance(groups, dict):
+            return "PLAYER"
         return groups.get("donate", "PLAYER")
 
     @property
     def display_group(self) -> str:
         """Отображаемая группа (приоритетная)"""
-        groups = self._data.get("groups", {})
+        groups = self._data.get("groups")
+        if not groups or not isinstance(groups, dict):
+            return "PLAYER"
         return groups.get("display", "PLAYER")
 
     @property
@@ -165,7 +177,9 @@ class Player:
     @property
     def is_online(self) -> bool | None:
         """Онлайн ли игрок (None если скрыто приватностью)"""
-        status = self._data.get("status", {})
+        status = self._data.get("status")
+        if not status or not isinstance(status, dict):
+            return None
         if "online" in status:
             return status.get("online")
         if status.get("privacyHidden"):
@@ -175,43 +189,57 @@ class Player:
     @property
     def privacy_hidden(self) -> bool:
         """Скрыл ли игрок свой онлайн-статус"""
-        status = self._data.get("status", {})
+        status = self._data.get("status")
+        if not status or not isinstance(status, dict):
+            return False
         return status.get("privacyHidden", False)
 
     @property
     def likes(self) -> int:
         """Количество лайков"""
-        stats = self._data.get("stats", {})
+        stats = self._data.get("stats")
+        if not stats or not isinstance(stats, dict):
+            return 0
         return stats.get("likes", 0)
 
     @property
     def dislikes(self) -> int:
         """Количество дизлайков"""
-        stats = self._data.get("stats", {})
+        stats = self._data.get("stats")
+        if not stats or not isinstance(stats, dict):
+            return 0
         return stats.get("dislikes", 0)
 
     @property
     def score(self) -> int:
         """Карма (likes - dislikes)"""
-        stats = self._data.get("stats", {})
+        stats = self._data.get("stats")
+        if not stats or not isinstance(stats, dict):
+            return self.likes - self.dislikes
         return stats.get("score", self.likes - self.dislikes)
 
     @property
     def views(self) -> int:
         """Просмотры профиля"""
-        stats = self._data.get("stats", {})
+        stats = self._data.get("stats")
+        if not stats or not isinstance(stats, dict):
+            return 0
         return stats.get("views", 0)
 
     @property
     def prefix(self) -> str:
         """Префикс игрока с цветовыми кодами"""
-        social = self._data.get("social", {})
+        social = self._data.get("social")
+        if not social or not isinstance(social, dict):
+            return ""
         return social.get("prefix", "")
 
     @property
     def formatted_name(self) -> str:
         """Отформатированное имя с префиксом и цветами"""
-        social = self._data.get("social", {})
+        social = self._data.get("social")
+        if not social or not isinstance(social, dict):
+            return self.username
         return social.get("formattedName", self.username)
 
     def to_dict(self) -> dict:
